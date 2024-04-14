@@ -8,7 +8,7 @@ var height = canvas.height;
 // Переменная с размером одного блока
 var blockSize = 10;
 
-// Переменные в которых содержатся данные с размерами холста в блоках
+// Переменные в которых считают размер поля в блоках
 var widhtInBlocks = width / blockSize;
 var heightInBlocks = height / blockSize;
 
@@ -34,7 +34,7 @@ var drawBorder = function () {
     ctx.fillRect(width - blockSize, 0, blockSize, height);
 };
 
-drawBorder();
+
 
 // Рисование счетчика очков
 var drawScore = function () {
@@ -44,7 +44,7 @@ var drawScore = function () {
     ctx.textBaseline = "top";
     ctx.fillText("Счет: " + score, blockSize, blockSize);
 };
-drawScore();
+
 
 //  Текст при проигровании
 var gameOver = function () {
@@ -55,7 +55,7 @@ var gameOver = function () {
     ctx.textBaseline = "middle";
     ctx.fillText("Конец игры", width / 2, height / 2);
 }
-gameOver();
+
 
 // Размер блока
 var block = function (col, row) {
@@ -71,9 +71,11 @@ block.prototype.drawSquare = function (color) {
     ctx.fillRect(x,y,blockSize,blockSize);
 };
 
+/*
 // Закрашивание блоков 
 var sampleBlock = new block(3, 4);
 sampleBlock.drawSquare("LightBlue");
+*/
 
 // Рисование яблок
 Block.prototype.drawCircle = function (color) {
@@ -83,6 +85,73 @@ Block.prototype.drawCircle = function (color) {
     circle(centreX, centreY, blockSize / 2, true);
 };
 
+/*
 // Закрашивание яблок
 var sampleCircle = new Block(4, 3);
 sampleCircle.drawCircle("LightGreen");
+*/
+
+// Функция которая сравнивает расположение головы и яблока
+Block.prototype.equal = function(otherBlock) {
+    return this.col === otherBlock.col && this.row === otherBlock.row;
+};
+
+/*
+// Координаты яблока и головы
+var apple = new Block(2, 5);
+var head = new Block(3, 5);
+head.equal(apple);
+*/
+
+// 3 клетки где появляется змейка и сторона направления
+var Snake = function () {
+    this.segments = [
+    new Block(7, 5),
+    new Block(6, 5),
+    new Block(5, 5)
+    ];
+this.direction = "right";
+this.nextDeriction = "right";
+};
+
+// Закрашивание каждой клетки где находится змейка
+Snake.prototype.draw = function () {
+    for (var i = 0; i < this.segments.length; i++) {
+        this.segments[i].drawSquare("Blue");
+    }
+};
+
+// Создается функция.
+// В переменной head хранятся координаты головы змейки.
+// Потом говорим что текущее направление равно следующему направлению.
+// Если направление будет направо, то будет добавлена одна колонка.
+// Если направление будет вниз, то будет добавлен один ряд.
+// Если направление будет влево, то будет отнята одна колонка.
+// Если направление будет вверх, то будет отнят один ряд.
+// Если голова поподает на ту клетку где находится яблоко, то прибавляется +1 к score и яблокок перемещается на другую клетку.
+// Иначе однимется одна клетка.
+Snake.prototype.move = function () {
+    var head = this.segments[0];
+    var newHead;
+    this.direction = this.nextDirection;
+    if (this.direction === "right") {
+        newHead = new Block(head.col + 1, head.row);
+    } else if (this.direction === "down") {
+        newHead = new Block(head.col, head.row + 1);
+    } else if (this.direction === "left") {
+        newHead = new Block(head.col - 1, head.row);
+    } else if (this.direction === "up") {
+        newHead = new Block(head.col, head.row - 1);
+    }
+    if (this.checkCollision(newHead)) {
+        gameOver();
+        return;
+    }
+    this.segments.unshift(newHead);
+    if (newHead.equal(apple.position)) {
+        score++;
+        apple.move();
+    } else {
+        this.segments.pop();
+    }
+};
