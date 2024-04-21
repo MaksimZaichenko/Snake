@@ -111,7 +111,7 @@ var Snake = function () {
     new Block(5, 5)
     ];
 this.direction = "right";
-this.nextDeriction = "right";
+this.nextDirection = "right";
 };
 
 // Закрашивание каждой клетки где находится змейка
@@ -154,4 +154,51 @@ Snake.prototype.move = function () {
     } else {
         this.segments.pop();
     }
+};
+
+// Если змейка находится на 0 клетке слева или сверху либо на 39 клетке справа или снизу то она врежется а код проверит координаты и закончит игру
+// Если змейка врежется в себя то код это заметит так как он проверяет клетку головы и все остальные клетки на которых находится змейка
+// При проигрыше все значения возращаются обратно
+Snake.prototype.checkCollision = function (head) {
+    var leftCollision = (head.col === 0);
+    var topCollision = (head.row === 0);
+    var rightCollision = (head.col === widhtInBlocks - 1);
+    var bottomCollision = (head.row === heightInBlocks - 1);
+    var wallCollision = leftCollision || topCollision || rightCollision || bottomCollision;
+
+    var selfCollision = false;
+    for (var i = 0; i < this.segments.length; i++) {
+        if (head.equal(this.segments[i])) {
+            selfCollision = true;
+        }
+    }
+    return wallCollision || selfCollision;//true
+};
+
+// При нажатии клавиши код определяет её по коду, если названия клавиши не будет в переменной direction то будет undefined
+//а если эта  клавиша будет то направление змейки поменяется
+var direction = {
+    37: "left",
+    38: "up",
+    39:"right",
+    40: "down"
+};
+$("body").keydown(function (event) {
+    var newDirection = direction[event.keydown] 
+        if (newDirection !== undefined) {
+            Snake.setDirection(newDirection);
+}}); 
+
+// Если игрок захочет повернуться назад то эта функция этого не даст сделать 
+// В функции записаны все недопустимые движения и код проверяет, если игрок все таки нажмет клавишу то ничего не произойдет и напрвление в setDirection заменяться не будет
+Snake.prototype.setDirection = function (newDirection) {
+    if (this.direction === "up" && newDirection === "left") {
+        return;
+    } else if (this.direction === "right" && newDirection === "left") {
+        return;
+    } else if (this.direction === "down" && newDirection === "up") {
+        return;
+    } else if (this.direction === "left" && newDirection === "right") {
+   return; }
+   this.nextDirection = newDirection;
 };
