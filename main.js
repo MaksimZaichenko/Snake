@@ -58,13 +58,13 @@ var gameOver = function () {
 
 
 // Размер блока
-var block = function (col, row) {
+var Block = function (col, row) {
     this.col = col;
     this.row = row;
 };
 
 // Размеры змейки
-block.prototype.drawSquare = function (color) {
+Block.prototype.drawSquare = function (color) {
     var x = this.col * blockSize;
     var y = this.row * blockSize;
     ctx.fillStyle = color;
@@ -184,15 +184,15 @@ var direction = {
     40: "down"
 };
 $("body").keydown(function (event) {
-    var newDirection = direction[event.keydown] 
+    var newDirection = direction[event.keyCode] 
         if (newDirection !== undefined) {
-            Snake.setDirection(newDirection);
+            snake.setDirection(newDirection);
 }}); 
 
 // Если игрок захочет повернуться назад то эта функция этого не даст сделать 
 // В функции записаны все недопустимые движения и код проверяет, если игрок все таки нажмет клавишу то ничего не произойдет и напрвление в setDirection заменяться не будет
 Snake.prototype.setDirection = function (newDirection) {
-    if (this.direction === "up" && newDirection === "left") {
+    if (this.direction === "up" && newDirection === "down") {
         return;
     } else if (this.direction === "right" && newDirection === "left") {
         return;
@@ -202,3 +202,32 @@ Snake.prototype.setDirection = function (newDirection) {
    return; }
    this.nextDirection = newDirection;
 };
+
+// Позиция первого яблока
+var Apple = function () {
+    this.position = new Block(10, 10);
+};
+
+// Закрашивание клетки на котором находится яблоко в зеленый
+Apple.prototype.draw = function () {
+    this.position.drawCircle("LimeGreen");
+};
+
+// Рандомные
+Apple.prototype.move = function () {
+    var randomCol = Math.floor(Math.random() * (widhtInBlocks - 2)) + 1;
+    var randomRow = Math.floor(Math.random() * (heightInBlocks - 2)) + 1;
+    this.position = new Block(randomCol, randomRow);
+};
+
+var snake = new Snake();
+var apple = new Apple();
+
+var intervalId = setInterval(function () {
+    ctx.clearRect(0, 0, width, height);
+    drawScore();
+    snake.move();
+    snake.draw();
+    apple.draw();
+    drawBorder();
+}, 100);
